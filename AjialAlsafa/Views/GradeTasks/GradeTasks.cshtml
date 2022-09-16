@@ -1,0 +1,373 @@
+﻿
+@{
+    ViewBag.Title = "GradeTasks";
+}
+
+<h2>GradeTasks</h2>
+
+<div class="container-fluid">
+    <div class="row app-row">
+
+        <div class="col-4">
+
+
+
+            <div class="separator mb-5"></div>
+
+            <div class="panel-body">
+
+                <div id="">
+
+                    <table id="GradesTable"
+                           class="table table-bordered table-hover " data-toggle="table" data-filter-control="true"
+                           data-toolbar="#toolbarC" data-show-pagination-switch="true" data-pagination="true" data-id-field="id" data-page-size="50" data-side-pagination="client">
+                        <thead>
+                            <tr>
+                                <th data-width="10%" data-checkbox="true">State </th>
+                                <th data-width="10%" data-field="id" data-filter-control="input" data-sortable="true">#</th>
+                                <th data-field="arbicTitle" data-formatter="GradesFormatter" data-width="60%" data-filter-control="input" data-sortable="true">الصف </th>
+
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+                <!-- /.row (nested) -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <div class="col-4">
+
+
+            <div class="panel-body">
+
+                <div id="">
+                    <div id="toolbarC">
+                        <button class="btn btn-outline-secondary hidden" id="btn_assign" name="btn_assign">اسناد</button>
+                    </div>
+                    <table id="ClassesTable"
+                           class="table table-bordered table-hover " data-toggle="table" data-filter-control="true"
+                           data-toolbar="#toolbarC" data-show-pagination-switch="true" data-pagination="true" data-id-field="id" data-page-size="50" data-side-pagination="client">
+                        <thead>
+                            <tr>
+                                <th data-width="10%" data-checkbox="true">State </th>
+
+                                <th data-width="10%" data-field="id" data-filter-control="input" data-sortable="true">#</th>
+                                <th data-field="arbicTitle" data-formatter="ClassFormatter" data-width="60%" data-filter-control="input" data-sortable="true">الشعبة </th>
+
+
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+                <!-- /.row (nested) -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+</div>
+
+
+<div class="app-menu" style="min-width:40%">
+    <div class="p-4 h-200">
+        <div class="scroll">
+
+
+            <div class="panel-body">
+
+                <div id="">
+
+                    <table id="TeacherSubjectTable"
+                           class="table table-bordered table-hover " data-toggle="table" data-filter-control="true"
+                           data-toolbar="#toolbar" data-show-pagination-switch="true" data-pagination="true" data-id-field="id" data-page-size="10" data-side-pagination="client">
+                        <thead>
+                            <tr>
+                                <th data-field="subjectName" data-width="60%" data-filter-control="input" data-sortable="true">المادة </th>
+                                <th data-field="accountId" data-width="60%" data-filter-control="input" data-sortable="true" data-formatter="EditTeacherNameFormatter">المدرس </th>
+
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+                <!-- /.row (nested) -->
+            </div>
+
+
+        </div>
+    </div>
+    <a class="app-menu-button d-inline-block d-xl-none" href="#">
+        <i class="simple-icon-options"></i>
+    </a>
+</div>
+
+<script>
+     var yearId = localStorage.getItem('yearId');
+     var termId = localStorage.getItem('termId');
+    var userId = 153;
+    var action = "";
+    var checkedRows = [];
+    var selectedGradeId = 0;
+    var selectedClassId = 0;
+    var teachersArray =[];
+    var teachersDropDown = function (selectedTeacher) {
+
+        var teachers = "<option value=0>------</options>";
+
+        $.each(teachersArray, function (k, i) {
+                if(i.id==selectedTeacher)
+                teachers += "<option value=" + i.id + " selected>" + i.name + "</option>"
+                else
+                 teachers += "<option value=" + i.id + ">" + i.name + "</option>"
+        });
+        console.log(teachers);
+        return teachers;
+    };
+
+    $(function () {
+        $.get('/GeneralComponents/List/1', function (r) {
+            $('#GradesTable').bootstrapTable('load', r);
+
+        })
+
+        $.get('/Accounts/List/87', function (r) {
+            teachersArray = r;
+
+
+
+
+        });
+
+
+
+
+        var $GradeTable = $('#GradesTable');
+        $GradeTable.on('click-row.bs.table', function (e, row, $element) {
+
+		    console.log('click-row.bs.table',row);
+            $.get("/GeneralComponents/List/2" , function (ckr) {
+                console.log(ckr);
+               $('#ClassesTable').bootstrapTable('load', ckr);
+
+            });
+
+            selectedGradeId = row.id;
+
+        });
+
+         var $ClassesTable = $('#ClassesTable');
+        $ClassesTable.on('click-row.bs.table', function (e, row, $element) {
+
+		    console.log('click-row.bs.table',row);
+            $.post("/SubjectTeachers/List/", {gradeId:selectedGradeId,classId:row.id}, function (ckr) {
+                console.log(ckr);
+               $('#TeacherSubjectTable').bootstrapTable('load', ckr);
+
+            });
+
+            selectedClassId = row.id;
+
+        });
+        $('#btn_assign').on('click', function (e) {
+            $.get('https://mis.smeps.org.ye:88/getlist/ActiveProjects/', function (e) {
+                var activeProjects = "<option value=0>----------</option>";
+                $.each(e, function (k, i) {
+
+                    activeProjects += "<option value=" + i.Id + ">" + i.Name + "</option>";
+
+                })
+                //  console.log(activeProjects);
+                $('#AssignToProject').html(activeProjects);
+                $('#assignToProjectModal').modal('show');
+            });
+
+
+        });
+        $('#btn_savePrjAsgn').on('click', function (e) {
+            var assignData = {
+                items: checkedRows,
+                projectId: $('#AssignToProject').val(),
+                createdBy:userId
+
+            }
+            $.post('/CheckLists/Assign', assignData, function (r) { alert(r);});
+        });
+
+    });
+    function buildCheckboxEvent() {
+        $('input[name="btSelectAll"]').on('change', function (e) {
+            if ($(this).is(":checked")) {
+                $("input[name='btSelectItem']").each(function (k2, i2) {
+                    checkedRows.push($("input[name='btSelectItem']").eq(k2).val());
+                });
+                $('#btn_assign').removeClass('hidden')
+                console.log(checkedRows);
+            }
+            else { checkedRows = []; $('#btn_assign').addClass('hidden'); }
+
+        });
+        $("input[name='btSelectItem']").each(function (k2, i2) {
+             $(this).on('change', function (e) {
+                if ($(this).is(":checked"))
+                 checkedRows.push($(this).val())
+                else
+                  checkedRows.splice($.inArray($(this).val(), checkedRows), 1);;
+                  if (checkedRows.length > 0)
+                     $('#btn_assign').removeClass('hidden')
+                 else
+                      $('#btn_assign').addClass('hidden')
+
+            });
+        });
+    }
+
+
+    function assignSubject2Teacher(subjectId, teacherId) {
+        var sta = {
+            accountId: teacherId,
+            classId:selectedClassId,
+            gradeId:selectedGradeId,
+            subjectId:subjectId,
+            yearId: yearId,
+            termId: termId,
+            createdBy:UserId
+        }
+        console.log('sta', sta);
+        $.post('/SubjectTeachers/Create', sta, function (r) {
+            alert(r);
+        });
+
+    }
+    function EditCheckListRow(RowData) {
+        var RowData = JSON.parse(decodeURIComponent(RowData));
+         action = "/CheckLists/Edit/" + RowData.id;
+        $('#list_name').val(RowData.name);
+        $("#CSortNo").val(RowData.sortNo);
+
+    }
+
+   function EditCheckListItemRow(RowData) {
+        var RowData = JSON.parse(decodeURIComponent(RowData));
+         action = "/CheckListItems/Edit/" + RowData.id;
+       $('#chekList_item_name').val(RowData.name);
+        $("#ISortNo").val(RowData.sortNo);
+
+    }
+     function DeleteCheckListRow(RowData) {
+       var result = confirm("هل انت متأكد من حذف هذا الصف؟");
+         if (result == true) {
+            var RowData = JSON.parse(decodeURIComponent(RowData));
+            $.post('/CheckLists/Delete/'+RowData.id, function (d) {
+                 if (parseInt(d) > 0) {
+                     $.get('/CheckLists/List/'+prjId, function (r) {
+                         $('#CheckListTable').bootstrapTable('load', r);
+                           $("#CheckListTable tbody").sortable({
+                helper: fixHelperModified,
+                stop: updateCheckListIndex
+
+            }).disableSelection();
+                         buildCheckboxEvent();
+                     });
+                     action = ""; $('#list_name').val('');
+                }
+            });
+       }
+    }
+    function DeleteCheckListItemRow(RowData) {
+       var result = confirm("هل انت متأكد من حذف هذا الصف؟");
+         if (result == true) {
+            var RowData = JSON.parse(decodeURIComponent(RowData));
+            $.post('/CheckListItems/Delete/'+RowData.id, function (d) {
+                 if (parseInt(d) > 0) {
+                     $.get('/CheckListItems/List/'+selectedCheckListId, function (r) {
+                         $('#CheckListItemsTable').bootstrapTable('load', r);
+                          $("#CheckListItemsTable tbody").sortable({
+                helper: fixHelperModified,
+                stop: updateCheckListItemIndex
+
+            }).disableSelection();
+                         buildCheckboxEvent();
+                     });
+                     action = ""; $('#chekList_item_name').val('');
+                }
+            });
+       }
+    }
+   function GradesFormatter(value, row, index) {
+    return [
+        '<a class=" CheckListRow selectedCheckList'+row.id+'" href="javascript:void(0);" title="Like" >',
+        '<i class=""></i>'+value,
+        '</a>'
+
+
+    ].join('');
+    }
+    function  ClassFormatter(value, row, index) {
+    return [
+        '<a class=" CheckListRow selectedCheckList'+row.id+'" href="javascript:void(0);" title="Like" >',
+        '<i class=""></i>'+value,
+        '</a>'
+
+
+    ].join('');
+    }
+
+
+
+    function  EditTeacherNameFormatter(value, row, index) {
+    return [
+        '<select id="slcTeacher'+row.id+'" class="form-control" onchange="assignSubject2Teacher('+row.subjectId+',this.value)">'+(teachersDropDown(value))+"</select>",
+
+
+        ].join('');
+
+
+
+    }
+    function EditCheckListFormatter(value, row, index) {
+        return [
+            '<a class="like btnEditDataElement"  title="Like" href="javascript:void(0)" onclick="EditCheckListRow(\'' + encodeURIComponent(JSON.stringify(row)) + '\');">',
+            '<i class="iconsminds-folder-edit"></i>',
+            '</a>'
+             ].join('');
+    }
+    function EditCheckListItemFormatter(value, row, index) {
+        return [
+            '<a class="like btnEditDataElement"  title="Like" href="javascript:void(0)" onclick="EditCheckListItemRow(\'' + encodeURIComponent(JSON.stringify(row)) + '\');">',
+            '<i class="iconsminds-folder-edit"></i>',
+            '</a>'
+             ].join('');
+    }
+
+     function DeleteCheckListFormatter(value, row, index) {
+        return [
+            '<a class="like btnEditDataElement"  title="Like" href="javascript:void(0)" onclick="DeleteCheckListRow(\'' + encodeURIComponent(JSON.stringify(row)) + '\');">',
+            '<i class="simple-icon-trash  "></i>',
+            '</a>'
+             ].join('');
+    }
+     function DeleteCheclListItemFormatter(value, row, index) {
+        return [
+            '<a class="like btnEditDataElement"  title="Like" href="javascript:void(0)" onclick="DeleteCheckListItemRow(\'' + encodeURIComponent(JSON.stringify(row)) + '\');">',
+            '<i class="simple-icon-trash  "></i>',
+            '</a>'
+             ].join('');
+    }
+    function CheckListSortListFormatter(value, row, index) {
+        return [
+            '<input type="text" id="ck' + row.id + '" class="index" value=' + index + '>'
+
+        ].join('');
+    }
+   function ItemSortListFormatter(value, row, index) {
+        return [
+            '<input type="text" id="cki' + row.id + '" class="index" value=' + index + '>'
+
+        ].join('');
+    }
+</script>
+

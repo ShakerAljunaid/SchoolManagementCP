@@ -1,0 +1,94 @@
+﻿body {
+}
+.SmepsHeader {
+    border-bottom: 1px solid;
+    margin: 0px;
+}
+
+.feesHeader {
+    margin-bottom: 20px;
+}
+.PrintTable td {
+    text-align: center;
+}
+.HeaderColmn {
+    font-weight: bold;
+    text-align: center;
+}
+
+table th {
+    text-align: center;
+    background-color: #a9a9a9;
+}
+.LogoEng {
+    padding-right: 30%;
+    width: 67%
+}
+
+.LogoArb {
+    width: 27%
+}
+
+@media print {
+  
+  
+   
+
+    @page {
+        margin-bottom: 7px;
+        /* margin: 0 -6cm size: auto; /* auto is the initial value 
+    this affects the margin in the printer settings 
+    /*  margin-top: 20px; 
+        margin-bottom: 20px;*/
+    }
+
+    .contractcontainer {
+        margin-right: 10px;
+        margin-left: 16px;
+        margin-bottom: 2px;
+    }
+
+    .LogoEng {
+        padding-right: 20%;
+        width: 63%
+    }
+
+    .LogoArb {
+        width: 27%
+    }
+
+    #PageContent, .panel-body, .smallFontPrint {
+        padding: 2px;
+        font-size: 11px;
+    }
+
+    .panel {
+        border: hidden;
+    }
+
+    section {
+        page-break-inside: avoid;
+    }
+
+    table {
+        page-break-inside: avoid;
+    }
+
+    .AppenixA table {
+        page-break-inside: unset;
+    }
+
+    .material-icons {
+        font-size: 10pt !important;
+    }
+    /*
+    footer {
+        border-top: 1px solid black;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        font-size: 8pt !important;
+    }
+        */
+
+}

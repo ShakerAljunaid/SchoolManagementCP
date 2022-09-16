@@ -1,0 +1,39 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<script>
+    $(function () {
+        //var acc =
+        //{
+        //    name: "Shaker",
+        //    phoneNo: '777304457',
+        //    password:'123456',
+        //    userName: "shaker",
+        //    email: "sha.100122@gmail.com",
+        //    address: 'صنعاء- بيت بوس',
+        //    accountTypeId: 18
+
+
+
+        //}
+        //$.post('/Accounts/Create', acc, function (r) {
+        //    console.log(r);
+        //});
+
+        var acc =
+        {
+            phoneNo: '777304457',
+            password:'123456'
+
+
+        }
+        $.post('/Accounts/Verify', acc, function (r) {
+            console.log(r);
+        });
+    });
+</script>
+

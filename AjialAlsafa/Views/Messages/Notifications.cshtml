@@ -1,0 +1,280 @@
+﻿
+@{
+    ViewBag.Title = "GradesSubjects";
+}
+
+<h2>GradesSubjects</h2>
+<div class="container-fluid">
+    <div class="row app-row">
+
+        <div class="col-4">
+
+
+
+            <div class="separator mb-5"></div>
+
+            <div class="panel-body">
+
+                <div id="">
+
+                    <table id="GradesTable"
+                           class="table table-bordered table-hover " data-toggle="table" data-filter-control="true"
+                           data-toolbar="#toolbarC" data-show-pagination-switch="true" data-pagination="true" data-id-field="id" data-page-size="50" data-side-pagination="client">
+                        <thead>
+                            <tr>
+                                <th data-width="10%" data-checkbox="true">State </th>
+                                <th data-width="10%" data-field="id" data-filter-control="input" data-sortable="true">#</th>
+                                <th data-field="arbicTitle" data-formatter="GradesFormatter" data-width="60%" data-filter-control="input" data-sortable="true">الصف </th>
+
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+                <!-- /.row (nested) -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!---   <div class="col-4">
+
+
+            <div class="panel-body">
+
+                <div id="">
+                    <div id="toolbarC">
+                        <button class="btn btn-outline-secondary hidden" id="btn_assign" name="btn_assign">اسناد</button>
+                    </div>
+                    <table id="ClassesTable"
+                           class="table table-bordered table-hover " data-toggle="table" data-filter-control="true"
+                           data-toolbar="#toolbarC" data-show-pagination-switch="true" data-pagination="true" data-id-field="id" data-page-size="50" data-side-pagination="client">
+                        <thead>
+                            <tr>
+                                <th data-width="10%" data-checkbox="true">State </th>
+
+                                <th data-width="10%" data-field="id" data-filter-control="input" data-sortable="true">#</th>
+                                <th data-field="arbicTitle" data-formatter="ClassFormatter" data-width="60%" data-filter-control="input" data-sortable="true">الشعبة </th>
+
+
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+                 /.row (nested)
+            </div>
+             /.panel-body
+        </div>-->
+    </div>
+    <div class="modal fade modal-left" id="CreateNewNotificationModal" tabindex="-1" role="dialog"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form>
+                        <div class="form-group">
+                            <label>جهة الإرسال</label>
+                            <select class="form-control" id="senderName" name="senderName">
+                                <option value="إدارة المدرسة">إدارة المدرسة</option>
+                                <option value="إدارة الصف">إدارة الصف</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>محتوى الإشعار</label>
+                            <textarea class="form-control coment" id="notificationContent" name="notificationContent" rows="3" placeholder="محتوى الإشعار..."></textarea>
+                        </div>
+
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary"
+                            data-dismiss="modal">
+                        خروج
+                    </button>
+                    <button type="button" id="btn_saveNotification" class="btn btn-primary">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="app-menu" style="min-width:40%">
+    <div class="p-4 h-200">
+        <div class="scroll">
+
+
+            <div class="panel-body">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" data-link="Create" id="btn_newNotification" name="btn_newNotification">إشعار جديد</button>
+                </div>
+                <div id="">
+
+                    <table id="SentMessagesTable"
+                           class="table table-bordered table-hover " data-toggle="table" data-filter-control="true"
+                           data-toolbar="#toolbar" data-show-pagination-switch="true" data-pagination="true" data-id-field="id" data-page-size="10" data-side-pagination="client">
+                        <thead>
+                            <tr>
+                                <th data-field="senderName" data-width="60%" data-filter-control="input" data-sortable="true">المادة </th>
+                                <th data-field="content" data-width="60%" data-filter-control="input" data-sortable="true" data-formatter="EditTeacherNameFormatter">المدرس </th>
+
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+                <!-- /.row (nested) -->
+            </div>
+
+
+        </div>
+    </div>
+    <a class="app-menu-button d-inline-block d-xl-none" href="#">
+        <i class="simple-icon-options"></i>
+    </a>
+</div>
+
+<script>
+    var schoolId = 1;
+     var yearId = localStorage.getItem('yearId');
+     var termId = localStorage.getItem('termId');
+    var userId = 153;
+    var action = "";
+    var checkedRows = [];
+    var selectedGradeId = 0;
+
+     
+    $(function () {
+        $.get('/GeneralComponents/List/1', function (r) {
+            $('#GradesTable').bootstrapTable('load', r);
+           
+        })
+
+      
+        
+
+         
+
+        var $GradeTable = $('#GradesTable');
+        $GradeTable.on('click-row.bs.table', function (e, row, $element) {
+
+		    console.log('click-row.bs.table',row);
+            $.get("/Messages/List/", { schoolId: schoolId, yearId: yearId, gradeId: row.id }, function (ckr) {
+                console.log(ckr);
+               $('#SentMessagesTable').bootstrapTable('load', ckr);
+             
+            });
+
+            selectedGradeId = row.id;
+           
+        });
+
+        $('#btn_newNotification').on('click', function (e) {
+            $('#CreateNewNotificationModal').modal('show');
+        });
+        $('#btn_saveNotification').on('click', function (e) {
+            var msg = {
+                gradeId:selectedGradeId,
+                classId: 0,
+                branchId: 0,
+                yearId: yearId,
+                schoolId: schoolId,
+                termId: termId,
+                typeId: 114,
+                title: 'إشعار',
+                content: $('#notificationContent').val(),
+                senderName: $('#senderName').val(),
+                senderId: 0,
+                receiverId: 0,
+                CreatedBy: userId
+
+            }
+            $.post('/Messages/Create', msg, function (r) {
+                console.log(r);
+            });
+
+        });
+        $('#btn_savePrjAsgn').on('click', function (e) {
+            var assignData = {
+                items: checkedRows,
+                projectId: $('#AssignToProject').val(),
+                createdBy:userId
+
+            }
+            $.post('/CheckLists/Assign', assignData, function (r) { alert(r);});
+        });
+
+    });
+    function buildCheckboxEvent() {
+        $('input[name="btSelectAll"]').on('change', function (e) {
+            if ($(this).is(":checked")) {
+                $("input[name='btSelectItem']").each(function (k2, i2) {
+                    checkedRows.push($("input[name='btSelectItem']").eq(k2).val());
+                });
+                $('#btn_assign').removeClass('hidden')
+                console.log(checkedRows);
+            }
+            else { checkedRows = []; $('#btn_assign').addClass('hidden'); }
+
+        });
+        $("input[name='btSelectItem']").each(function (k2, i2) {
+             $(this).on('change', function (e) {
+                if ($(this).is(":checked"))
+                 checkedRows.push($(this).val())
+                else
+                  checkedRows.splice($.inArray($(this).val(), checkedRows), 1);;
+                  if (checkedRows.length > 0)
+                     $('#btn_assign').removeClass('hidden')
+                 else
+                      $('#btn_assign').addClass('hidden')
+
+            });
+        });
+    }
+
+
+   
+   function GradesFormatter(value, row, index) {
+    return [
+        '<a class=" CheckListRow selectedCheckList'+row.id+'" href="javascript:void(0);" title="Like" >',
+        '<i class=""></i>'+value,
+        '</a>'
+
+
+    ].join('');
+    }
+    function  ClassFormatter(value, row, index) {
+    return [
+        '<a class=" CheckListRow selectedCheckList'+row.id+'" href="javascript:void(0);" title="Like" >',
+        '<i class=""></i>'+value,
+        '</a>'
+
+
+    ].join('');
+    }
+
+
+
+    function  EditTeacherNameFormatter(value, row, index) {
+    return [
+        '<select id="slcTeacher'+row.id+'" class="form-control" onchange="assignSubject2Teacher('+row.subjectId+',this.value)">'+(teachersDropDown(value))+"</select>",
+       
+
+        ].join('');
+
+      
+
+    }
+    
+</script>
+
